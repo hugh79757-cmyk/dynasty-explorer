@@ -761,8 +761,9 @@ export default function CultureSpreadMap() {
         <p className="mt-3 text-sm sm:text-base font-medium" style={{ color: "#D4AF37" }}>
           每个文明都有独特的光芒，它们彼此照亮
         </p>
-        <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}>
-          🎯 挑战：找出6条文化传播路线！已发现 <span style={{ color: "#D4AF37" }}>{discoveredFlows.size}/6</span>
+        <div className="mt-5 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold text-white" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}>
+          <span>🎯 挑战：找出6条文化传播路线！</span>
+          <span>已发现 <span style={{ color: "#D4AF37" }}>{discoveredFlows.size}/6</span></span>
         </div>
       </div>
 
