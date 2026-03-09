@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // ─── Culture Flow Data ───────────────────────────────────────────────────────
 
@@ -262,6 +263,52 @@ const FUN_FACTS = [
   { emoji: "🥢", text: "东亚各国的筷子各不相同——中国用长圆筷，韩国用金属扁筷，日本用短尖筷——同一种餐具，三种不同的创新！", color: "#D4AF37" },
 ];
 
+// ─── Theme-aware color helpers ──────────────────────────────────────────────
+
+function useThemedColors() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  return {
+    isDark,
+    pageBg: isDark ? "#111827" : "#ffffff",
+    headerBg: isDark ? "linear-gradient(135deg, #1a1a2e, #16213e)" : "linear-gradient(135deg, #f8f4ef, #ede5d8)",
+    headerText: isDark ? "text-white" : "text-foreground",
+    headerSubColor: isDark ? "#D4AF37" : "#8B6914",
+    diagramBg: isDark ? "#111827" : "#f3f0eb",
+    nodeBg: isDark ? "hsl(220 15% 13%)" : "#ffffff",
+    nodeLabel: isDark ? "text-white/90" : "text-foreground",
+    nodeLabelHover: isDark ? "text-white" : "text-primary",
+    connectionDefault: isDark ? "#374151" : "#c4b99a",
+    cardsBg: isDark ? "#1a1a2e" : "#f9fafb",
+    cardBg: isDark ? "#1e1e2e" : "#ffffff",
+    cardBorder: isDark ? "#333" : "#e5e7eb",
+    cardText: isDark ? "text-white" : "text-gray-800",
+    cardTextSub: isDark ? "text-gray-400" : "text-gray-500",
+    cardHover: isDark ? "hover:bg-white/5" : "hover:bg-gray-50",
+    factBg: isDark ? "#1a1a2e" : "#ffffff",
+    factText: isDark ? "text-gray-300" : "text-gray-700",
+    factDivider: isDark ? "#374151" : "#e5e7eb",
+    factTitle: isDark ? "text-gray-300" : "text-gray-700",
+    footerBg: isDark ? "#111827" : "#f9fafb",
+    footerText: isDark ? "text-gray-300" : "text-gray-700",
+    footerSub: isDark ? "text-gray-500" : "text-gray-400",
+    modalBg: isDark ? "#1e1e2e" : "#ffffff",
+    modalBorder: isDark ? "#333" : "#e5e7eb",
+    modalText: isDark ? "text-white" : "text-gray-800",
+    modalTextSub: isDark ? "text-gray-400" : "text-gray-500",
+    popupText: isDark ? "text-gray-300" : "text-gray-700",
+    popupTextSub: isDark ? "text-gray-400" : "text-gray-500",
+    badgeBg: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+    badgeBorder: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)",
+    badgeText: isDark ? "text-white" : "text-foreground",
+    chipInactive: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+    chipInactiveText: isDark ? "#999" : "#777",
+    chipInactiveBorder: isDark ? "#444" : "#ccc",
+    navBtnBg: isDark ? "bg-white" : "bg-white",
+    navBtnBorder: isDark ? "border-gray-700" : "border-gray-200",
+  };
+}
+
 // ─── Node Diagram Component ─────────────────────────────────────────────────
 
 function NodeDiagram({
@@ -274,8 +321,8 @@ function NodeDiagram({
   discoveredFlows: Set<string>;
 }) {
   const isMobile = useIsMobile();
+  const tc = useThemedColors();
 
-  // Mobile: vertical layout; Desktop: horizontal layout
   const MOBILE_POSITIONS: Record<string, { x: number; y: number }> = {
     china:    { x: 150, y: 40 },
     goguryeo: { x: 80, y: 140 },
@@ -309,13 +356,12 @@ function NodeDiagram({
         }
       }
     }
-    return { color: "#374151", active: false };
+    return { color: tc.connectionDefault, active: false };
   };
 
   return (
     <div className="relative w-full overflow-x-auto flex justify-center">
       <div className="relative mx-auto" style={{ width: canvasW, height: canvasH }}>
-        {/* SVG lines */}
         <svg className="absolute inset-0 w-full h-full" style={{ width: canvasW, height: canvasH }}>
           {CONNECTIONS.map(([a, b]) => {
             const pa = getNodePos(a);
@@ -339,7 +385,6 @@ function NodeDiagram({
               />
             );
           })}
-          {/* Animated route arrows */}
           {activeRoutes.map((route) => {
             const flow = FLOWS.find(f => f.id === route.flowId);
             if (!flow) return null;
@@ -372,14 +417,13 @@ function NodeDiagram({
           })}
         </svg>
 
-        {/* Nodes */}
         {KINGDOMS.map((k) => {
           const pos = getNodePos(k.id);
           const isOnRoute = activeRoutes.some(r => r.nodes.includes(k.id));
           return (
             <motion.button
               key={k.id}
-              className="absolute flex flex-col items-center gap-0.5 group"
+              className={`absolute flex flex-col items-center gap-0.5 group`}
               style={{ left: pos.x - nodeSize / 2, top: pos.y - nodeSize / 2 }}
               onClick={() => onNodeClick(k.id)}
               whileHover={{ scale: 1.12 }}
@@ -391,7 +435,7 @@ function NodeDiagram({
                   width: nodeSize,
                   height: nodeSize,
                   borderColor: k.color,
-                  background: isOnRoute ? `${k.color}25` : "hsl(220 15% 13%)",
+                  background: isOnRoute ? `${k.color}25` : tc.nodeBg,
                 }}
                 animate={{
                   boxShadow: isOnRoute
@@ -408,14 +452,13 @@ function NodeDiagram({
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 />
               </motion.div>
-              <span className={`${isMobile ? "text-[10px]" : "text-xs"} font-bold text-white/90 group-hover:text-white transition-colors whitespace-nowrap`}>
+              <span className={`${isMobile ? "text-[10px]" : "text-xs"} font-bold ${tc.nodeLabel} group-hover:${tc.nodeLabelHover} transition-colors whitespace-nowrap`}>
                 {k.name}
               </span>
             </motion.button>
           );
         })}
 
-        {/* Year labels on active routes */}
         {activeRoutes.map((route) => {
           const flow = FLOWS.find(f => f.id === route.flowId);
           if (!flow) return null;
@@ -461,6 +504,8 @@ function RouteModal({
   onClose: () => void;
   discoveredFlows: Set<string>;
 }) {
+  const tc = useThemedColors();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -475,12 +520,12 @@ function RouteModal({
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         className="relative z-10 w-full max-w-sm rounded-2xl p-6"
-        style={{ background: "#1e1e2e", border: "1px solid #333" }}
+        style={{ background: tc.modalBg, border: `1px solid ${tc.modalBorder}` }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-white">选择一种文化，追踪传播路线：</h3>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-white/10 text-white/60">
+          <h3 className={`text-lg font-bold ${tc.modalText}`}>选择一种文化，追踪传播路线：</h3>
+          <button onClick={onClose} className={`p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 ${tc.modalTextSub}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -493,13 +538,13 @@ function RouteModal({
                 onClick={() => onSelect(f.id)}
                 className="flex items-center gap-2 px-3 py-3 rounded-xl text-left transition-all hover:scale-[1.02]"
                 style={{
-                  background: isDiscovered ? `${f.color}20` : "#2a2a3e",
-                  border: `2px solid ${isDiscovered ? f.color : "#444"}`,
+                  background: isDiscovered ? `${f.color}20` : tc.isDark ? "#2a2a3e" : "#f5f5f5",
+                  border: `2px solid ${isDiscovered ? f.color : tc.cardBorder}`,
                 }}
               >
                 <span className="text-lg">{f.emoji}</span>
                 <div>
-                  <span className="text-sm font-bold text-white">{f.name}</span>
+                  <span className={`text-sm font-bold ${tc.modalText}`}>{f.name}</span>
                   {isDiscovered && <span className="text-[10px] text-green-400 block">✓ 已发现</span>}
                 </div>
               </button>
@@ -515,13 +560,13 @@ function RouteModal({
 
 function CivCard({ kingdom }: { kingdom: KingdomData }) {
   const [expanded, setExpanded] = useState<number | null>(null);
+  const tc = useThemedColors();
 
   return (
     <div
       className="flex-shrink-0 w-[280px] sm:w-[300px] rounded-2xl overflow-hidden shadow-lg"
-      style={{ background: "#fff", border: "1px solid #e5e7eb" }}
+      style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}
     >
-      {/* Top band */}
       <div className="p-4" style={{ background: `linear-gradient(135deg, ${kingdom.color}, ${kingdom.color}cc)` }}>
         <div className="flex items-center gap-3">
           <span className="text-3xl">{kingdom.emblem}</span>
@@ -531,23 +576,21 @@ function CivCard({ kingdom }: { kingdom: KingdomData }) {
           </div>
         </div>
       </div>
-      {/* Period tag */}
       <div className="px-4 pt-3">
         <span className="text-[10px] px-2 py-1 rounded-full font-medium" style={{ background: `${kingdom.color}15`, color: kingdom.color, border: `1px solid ${kingdom.color}33` }}>
           📅 {kingdom.period}
         </span>
       </div>
-      {/* Highlights */}
       <div className="p-4 space-y-1.5">
         {kingdom.highlights.map((h, i) => (
           <div key={i}>
             <button
               onClick={() => setExpanded(expanded === i ? null : i)}
-              className="w-full flex items-center justify-between text-left py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
+              className={`w-full flex items-center justify-between text-left py-2 px-3 rounded-lg ${tc.cardHover} transition-colors`}
             >
-              <span className="text-sm font-medium text-gray-800 flex-1">{h.name}</span>
+              <span className={`text-sm font-medium ${tc.cardText} flex-1`}>{h.name}</span>
               <ChevronDown
-                className="w-4 h-4 text-gray-400 transition-transform shrink-0"
+                className={`w-4 h-4 ${tc.cardTextSub} transition-transform shrink-0`}
                 style={{ transform: expanded === i ? "rotate(180deg)" : "rotate(0deg)" }}
               />
             </button>
@@ -559,16 +602,15 @@ function CivCard({ kingdom }: { kingdom: KingdomData }) {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <p className="text-xs text-gray-500 leading-relaxed px-3 pb-2">{h.desc}</p>
+                  <p className={`text-xs ${tc.cardTextSub} leading-relaxed px-3 pb-2`}>{h.desc}</p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         ))}
       </div>
-      {/* Unique achievement */}
       <div className="mx-4 mb-4 p-3 rounded-xl" style={{ background: `${kingdom.color}08`, borderLeft: `3px solid ${kingdom.color}` }}>
-        <p className="text-[11px] text-gray-500 leading-relaxed">🌟 {kingdom.uniqueAchievement}</p>
+        <p className={`text-[11px] ${tc.cardTextSub} leading-relaxed`}>🌟 {kingdom.uniqueAchievement}</p>
       </div>
     </div>
   );
@@ -577,6 +619,8 @@ function CivCard({ kingdom }: { kingdom: KingdomData }) {
 // ─── Flow Detail Popup ───────────────────────────────────────────────────────
 
 function FlowPopup({ flow, onClose }: { flow: CultureFlow; onClose: () => void }) {
+  const tc = useThemedColors();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -591,7 +635,7 @@ function FlowPopup({ flow, onClose }: { flow: CultureFlow; onClose: () => void }
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.92, y: 20 }}
         className="relative z-10 w-full max-w-md max-h-[80vh] overflow-y-auto rounded-2xl shadow-2xl"
-        style={{ background: "#fff", border: `2px solid ${flow.color}` }}
+        style={{ background: tc.cardBg, border: `2px solid ${flow.color}` }}
         onClick={e => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 rounded-t-2xl" style={{ background: `linear-gradient(135deg, ${flow.color}, ${flow.color}cc)` }}>
@@ -602,9 +646,9 @@ function FlowPopup({ flow, onClose }: { flow: CultureFlow; onClose: () => void }
           <button onClick={onClose} className="p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-4 space-y-4">
-          <p className="text-sm text-gray-700 leading-relaxed">{flow.description}</p>
+          <p className={`text-sm ${tc.popupText} leading-relaxed`}>{flow.description}</p>
           <div>
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">📅 传播时间线</h4>
+            <h4 className={`text-xs font-bold ${tc.popupTextSub} uppercase tracking-wider mb-2`}>📅 传播时间线</h4>
             <div className="relative pl-4">
               <div className="absolute left-1.5 top-2 bottom-2 w-0.5 rounded-full" style={{ background: `${flow.color}44` }} />
               {flow.timeline.map((r, i) => (
@@ -612,10 +656,10 @@ function FlowPopup({ flow, onClose }: { flow: CultureFlow; onClose: () => void }
                   <div className="w-3 h-3 rounded-full mt-1 shrink-0 absolute -left-[18px]" style={{ backgroundColor: flow.color }} />
                   <div className="flex-1 pl-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-sm text-gray-800">{r.place}</span>
+                      <span className={`font-bold text-sm ${tc.cardText}`}>{r.place}</span>
                       {r.year && <span className="text-xs px-2 py-0.5 rounded-full text-white font-medium" style={{ background: flow.color }}>{r.year}</span>}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{r.desc}</p>
+                    <p className={`text-xs ${tc.popupTextSub} mt-0.5 leading-relaxed`}>{r.desc}</p>
                   </div>
                 </div>
               ))}
@@ -623,10 +667,10 @@ function FlowPopup({ flow, onClose }: { flow: CultureFlow; onClose: () => void }
           </div>
           <div className="rounded-xl p-3" style={{ background: `${flow.color}10`, border: `1px solid ${flow.color}33` }}>
             <h4 className="text-xs font-bold mb-1" style={{ color: flow.color }}>💡 历史意义</h4>
-            <p className="text-sm text-gray-700 leading-relaxed">{flow.significance}</p>
+            <p className={`text-sm ${tc.popupText} leading-relaxed`}>{flow.significance}</p>
           </div>
           <div>
-            <h4 className="text-xs font-bold text-gray-400 mb-2">🏛 相关朝代/时期</h4>
+            <h4 className={`text-xs font-bold ${tc.popupTextSub} mb-2`}>🏛 相关朝代/时期</h4>
             <div className="flex flex-wrap gap-1.5">
               {flow.dynasties.map((d) => (
                 <span key={d} className="text-xs px-2 py-1 rounded-full" style={{ border: `1px solid ${flow.color}66`, color: flow.color }}>{d}</span>
@@ -646,6 +690,7 @@ function FunFactsCarousel() {
   const timerRef = useRef<ReturnType<typeof setInterval>>();
   const next = useCallback(() => setIdx((i) => (i + 1) % FUN_FACTS.length), []);
   const prev = useCallback(() => setIdx((i) => (i - 1 + FUN_FACTS.length) % FUN_FACTS.length), []);
+  const tc = useThemedColors();
 
   useEffect(() => {
     timerRef.current = setInterval(next, 5000);
@@ -663,9 +708,9 @@ function FunFactsCarousel() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <div className="h-px flex-1 bg-gray-200" />
-        <h2 className="text-sm font-bold text-gray-700 whitespace-nowrap px-2">💡 你知道吗？</h2>
-        <div className="h-px flex-1 bg-gray-200" />
+        <div className="h-px flex-1" style={{ background: tc.factDivider }} />
+        <h2 className={`text-sm font-bold ${tc.factTitle} whitespace-nowrap px-2`}>💡 你知道吗？</h2>
+        <div className="h-px flex-1" style={{ background: tc.factDivider }} />
       </div>
       <div className="relative">
         <AnimatePresence mode="wait">
@@ -675,18 +720,18 @@ function FunFactsCarousel() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.3 }}
-            className="p-4 sm:p-5 rounded-2xl min-h-[100px] flex items-center gap-3 sm:gap-4 mx-10 sm:mx-0"
+            className={`p-4 sm:p-5 rounded-2xl min-h-[100px] flex items-center gap-3 sm:gap-4 mx-10 sm:mx-0`}
             style={{ border: `2px solid ${fact.color}33`, background: `${fact.color}08` }}
           >
             <span className="text-3xl sm:text-4xl shrink-0">{fact.emoji}</span>
-            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed flex-1">{fact.text}</p>
+            <p className={`text-xs sm:text-sm ${tc.factText} leading-relaxed flex-1`}>{fact.text}</p>
           </motion.div>
         </AnimatePresence>
-        <button onClick={() => go("prev")} className="absolute left-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
-          <ChevronLeft className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600" />
+        <button onClick={() => go("prev")} className="absolute left-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full border shadow transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center bg-card border-border hover:bg-secondary">
+          <ChevronLeft className="w-5 h-5 sm:w-4 sm:h-4 text-muted-foreground" />
         </button>
-        <button onClick={() => go("next")} className="absolute right-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
-          <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600" />
+        <button onClick={() => go("next")} className="absolute right-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full border shadow transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center bg-card border-border hover:bg-secondary">
+          <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4 text-muted-foreground" />
         </button>
       </div>
       <div className="flex justify-center gap-1.5">
@@ -695,7 +740,7 @@ function FunFactsCarousel() {
             key={i}
             onClick={() => { clearInterval(timerRef.current); setIdx(i); timerRef.current = setInterval(next, 5000); }}
             className={`w-2 h-2 rounded-full transition-all ${i === idx ? "scale-125" : ""}`}
-            style={{ background: i === idx ? fact.color : "#d1d5db" }}
+            style={{ background: i === idx ? fact.color : tc.isDark ? "#555" : "#d1d5db" }}
           />
         ))}
       </div>
@@ -712,6 +757,7 @@ export default function CultureSpreadMap() {
   const [selectedFlowDetail, setSelectedFlowDetail] = useState<CultureFlow | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const tc = useThemedColors();
 
   const handleNodeClick = useCallback((id: string) => {
     setModalKingdom(id);
@@ -721,10 +767,8 @@ export default function CultureSpreadMap() {
     const flow = FLOWS.find(f => f.id === flowId);
     if (!flow) return;
     setModalKingdom(null);
-    // Set route
     setActiveRoutes([{ flowId, nodes: flow.route }]);
     setDiscoveredFlows(prev => new Set([...prev, flowId]));
-    // Show detail after short delay
     setTimeout(() => setSelectedFlowDetail(flow), 800);
   }, []);
 
@@ -749,29 +793,29 @@ export default function CultureSpreadMap() {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: "#ffffff" }}>
+    <div className="min-h-screen overflow-x-hidden bg-background transition-colors duration-300">
       {/* Section 1: Header */}
       <div
         className="relative overflow-hidden py-10 px-4 text-center"
-        style={{ background: "linear-gradient(135deg, #1a1a2e, #16213e)" }}
+        style={{ background: tc.headerBg }}
       >
-        <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+        <h1 className={`text-3xl sm:text-5xl font-black ${tc.headerText} tracking-tight`}>
           🔥 东亚文明之光
         </h1>
-        <p className="mt-3 text-sm sm:text-base font-medium" style={{ color: "#D4AF37" }}>
+        <p className="mt-3 text-sm sm:text-base font-medium" style={{ color: tc.headerSubColor }}>
           每个文明都有独特的光芒，它们彼此照亮
         </p>
-        <div className="mt-5 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold text-white" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}>
+        <div className={`mt-5 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold ${tc.badgeText}`} style={{ background: tc.badgeBg, border: `1px solid ${tc.badgeBorder}` }}>
           <span>🎯 挑战：找出6条文化传播路线！</span>
-          <span>已发现 <span style={{ color: "#D4AF37" }}>{discoveredFlows.size}/6</span></span>
+          <span>已发现 <span style={{ color: tc.headerSubColor }}>{discoveredFlows.size}/6</span></span>
         </div>
       </div>
 
       {/* Section 2: Node Diagram */}
-      <div className="py-8 px-4" style={{ background: "#111827" }}>
+      <div className="py-8 px-4 transition-colors duration-300" style={{ background: tc.diagramBg }}>
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-2 gap-2">
-            <p className="text-[11px] sm:text-xs text-gray-400">点击任意节点，选择文化路线进行追踪</p>
+            <p className={`text-[11px] sm:text-xs ${tc.cardTextSub}`}>点击任意节点，选择文化路线进行追踪</p>
             <Button
               size="sm"
               onClick={handlePlayAll}
@@ -796,9 +840,9 @@ export default function CultureSpreadMap() {
                 onClick={() => handleSelectFlow(f.id)}
                 className="flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-all hover:scale-105 min-h-[44px]"
                 style={{
-                  background: discoveredFlows.has(f.id) ? `${f.color}25` : "rgba(255,255,255,0.05)",
-                  border: `1.5px solid ${discoveredFlows.has(f.id) ? f.color : "#444"}`,
-                  color: discoveredFlows.has(f.id) ? f.color : "#999",
+                  background: discoveredFlows.has(f.id) ? `${f.color}25` : tc.chipInactive,
+                  border: `1.5px solid ${discoveredFlows.has(f.id) ? f.color : tc.chipInactiveBorder}`,
+                  color: discoveredFlows.has(f.id) ? f.color : tc.chipInactiveText,
                 }}
               >
                 <span>{f.emoji}</span>
@@ -811,9 +855,9 @@ export default function CultureSpreadMap() {
       </div>
 
       {/* Section 3: Civilization Cards */}
-      <div className="py-10 px-4" style={{ background: "#f9fafb" }}>
+      <div className="py-10 px-4 transition-colors duration-300" style={{ background: tc.cardsBg }}>
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">🌏 七大文明亮点</h2>
+          <h2 className={`text-xl font-bold ${tc.cardText} mb-6 text-center`}>🌏 七大文明亮点</h2>
           <div
             ref={cardsRef}
             className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
@@ -829,18 +873,18 @@ export default function CultureSpreadMap() {
       </div>
 
       {/* Section 4: Fun Facts */}
-      <div className="py-10 px-4" style={{ background: "#ffffff" }}>
+      <div className="py-10 px-4 transition-colors duration-300" style={{ background: tc.factBg }}>
         <div className="max-w-2xl mx-auto">
           <FunFactsCarousel />
         </div>
       </div>
 
       {/* Footer message */}
-      <div className="py-8 px-4 text-center" style={{ background: "#f9fafb" }}>
-        <p className="text-base font-bold text-gray-700">
+      <div className="py-8 px-4 text-center transition-colors duration-300" style={{ background: tc.footerBg }}>
+        <p className={`text-base font-bold ${tc.footerText}`}>
           🌏 这些伟大的文明互相学习、互相影响，共同创造了灿烂的东亚文化
         </p>
-        <p className="text-sm text-gray-400 mt-2">东亚文明之光 — 东亚人民共同的历史遗产</p>
+        <p className={`text-sm ${tc.footerSub} mt-2`}>东亚文明之光 — 东亚人民共同的历史遗产</p>
       </div>
 
       {/* Modals */}
