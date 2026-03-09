@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import Index, { NavBar } from "./pages/Index";
 import DynastyTimeline from "./pages/DynastyTimeline";
 import CultureFlow from "./pages/CultureFlow";
@@ -18,6 +20,7 @@ function AppContent() {
 
   return (
     <>
+      <ThemeToggle />
       <span
         className="fixed top-2 right-3 z-[9999] text-[11px] opacity-40 hover:opacity-90 transition-opacity duration-300 pointer-events-auto select-none"
         style={{ color: 'rgba(255,255,255,0.4)' }}
@@ -44,11 +47,13 @@ function AppContent() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter basename="/dynasty-explorer">
-        <AppContent />
-      </BrowserRouter>
+      <ThemeProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter basename="/dynasty-explorer">
+          <AppContent />
+        </BrowserRouter>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
