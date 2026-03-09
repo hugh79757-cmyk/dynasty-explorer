@@ -518,7 +518,7 @@ function CivCard({ kingdom }: { kingdom: KingdomData }) {
 
   return (
     <div
-      className="flex-shrink-0 w-[300px] rounded-2xl overflow-hidden shadow-lg"
+      className="flex-shrink-0 w-[280px] sm:w-[300px] rounded-2xl overflow-hidden shadow-lg"
       style={{ background: "#fff", border: "1px solid #e5e7eb" }}
     >
       {/* Top band */}
