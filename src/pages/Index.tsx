@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { Clock, Map, HelpCircle } from "lucide-react";
+import { Clock, Map, HelpCircle, Globe } from "lucide-react";
 
 const navItems = [
   { to: "/dynasty-timeline", label: "朝代时间线", icon: Clock, desc: "从夏到唐" },
   { to: "/culture-flow", label: "文化传播", icon: Map, desc: "中国→韩国→日本" },
+  { to: "/culture-map", label: "文化地图", icon: Globe, desc: "互动传播地图" },
   { to: "/history-quiz", label: "历史问答", icon: HelpCircle, desc: "20道趣味题" },
 ];
 
