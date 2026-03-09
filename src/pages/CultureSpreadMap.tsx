@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // ─── Culture Flow Data ───────────────────────────────────────────────────────
 
