@@ -72,7 +72,7 @@ export const dynasties: Dynasty[] = [
     startYear: -1046,
     endYear: -771,
     period: "前1046年—前771年",
-    description: "西周推行封建制度，礼乐文化达到顶峰。周公制礼作乐，为儒家思想奠定了基础。分封诸侯，形成"天下共主"的政治格局。",
+    description: "西周推行封建制度，礼乐文化达到顶峰。周公制礼作乐，为儒家思想奠定了基础。分封诸侯，形成【天下共主】的政治格局。",
     capital: "镐京（今陕西西安）",
     keyFigures: [
       { name: "周武王", role: "建国之君，灭商" },
