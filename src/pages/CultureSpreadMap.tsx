@@ -749,7 +749,7 @@ export default function CultureSpreadMap() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ background: "#ffffff" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: "#ffffff" }}>
       {/* Section 1: Header */}
       <div
         className="relative overflow-hidden py-10 px-4 text-center"
