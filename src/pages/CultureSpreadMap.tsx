@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // ─── Culture Flow Data ───────────────────────────────────────────────────────
 
@@ -272,18 +273,32 @@ function NodeDiagram({
   activeRoutes: { flowId: string; nodes: string[] }[];
   discoveredFlows: Set<string>;
 }) {
-  // Compute pixel positions for each node
+  const isMobile = useIsMobile();
+
+  // Mobile: vertical layout; Desktop: horizontal layout
+  const MOBILE_POSITIONS: Record<string, { x: number; y: number }> = {
+    china:    { x: 150, y: 40 },
+    goguryeo: { x: 80, y: 140 },
+    baekje:   { x: 220, y: 140 },
+    gaya:     { x: 80, y: 240 },
+    silla:    { x: 220, y: 240 },
+    balhae:   { x: 150, y: 340 },
+    japan:    { x: 150, y: 440 },
+  };
+
   const getNodePos = (id: string) => {
+    if (isMobile) return MOBILE_POSITIONS[id];
     const pos = NODE_POSITIONS[id];
-    // 7 columns, 3 rows layout
-    const xPositions = [0, 1, 2, 3, 4, 5, 6];
-    const yPositions = [0, 1, 2];
-    const x = 80 + xPositions[pos.col] * 110;
-    const y = 60 + yPositions[pos.row] * 130;
+    const x = 80 + pos.col * 110;
+    const y = 60 + pos.row * 130;
     return { x, y };
   };
 
-  // Check if a connection is part of any active route
+  const nodeSize = isMobile ? 56 : 72;
+  const emojiSize = isMobile ? "text-2xl" : "text-3xl";
+  const canvasW = isMobile ? 300 : 860;
+  const canvasH = isMobile ? 500 : 380;
+
   const getConnectionColor = (a: string, b: string): { color: string; active: boolean } => {
     for (const route of activeRoutes) {
       const nodes = route.nodes;
@@ -298,10 +313,10 @@ function NodeDiagram({
   };
 
   return (
-    <div className="relative w-full overflow-x-auto">
-      <div className="relative mx-auto" style={{ width: 860, height: 380 }}>
+    <div className="relative w-full overflow-x-auto flex justify-center">
+      <div className="relative mx-auto" style={{ width: canvasW, height: canvasH }}>
         {/* SVG lines */}
-        <svg className="absolute inset-0 w-full h-full" style={{ width: 860, height: 380 }}>
+        <svg className="absolute inset-0 w-full h-full" style={{ width: canvasW, height: canvasH }}>
           {CONNECTIONS.map(([a, b]) => {
             const pa = getNodePos(a);
             const pb = getNodePos(b);
@@ -336,17 +351,17 @@ function NodeDiagram({
               const len = Math.sqrt(dx * dx + dy * dy);
               const ux = dx / len;
               const uy = dy / len;
-              // Shorten line to not overlap circles
-              const sx = p.x + ux * 44;
-              const sy = p.y + uy * 44;
-              const ex = next.x - ux * 44;
-              const ey = next.y - uy * 44;
+              const offset = nodeSize / 2 + 6;
+              const sx = p.x + ux * offset;
+              const sy = p.y + uy * offset;
+              const ex = next.x - ux * offset;
+              const ey = next.y - uy * offset;
               return (
                 <motion.line
                   key={`route-${route.flowId}-${i}`}
                   x1={sx} y1={sy} x2={ex} y2={ey}
                   stroke={flow.color}
-                  strokeWidth={4}
+                  strokeWidth={isMobile ? 3 : 4}
                   strokeLinecap="round"
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: 1 }}
@@ -364,15 +379,17 @@ function NodeDiagram({
           return (
             <motion.button
               key={k.id}
-              className="absolute flex flex-col items-center gap-1 group"
-              style={{ left: pos.x - 40, top: pos.y - 40 }}
+              className="absolute flex flex-col items-center gap-0.5 group"
+              style={{ left: pos.x - nodeSize / 2, top: pos.y - nodeSize / 2 }}
               onClick={() => onNodeClick(k.id)}
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.95 }}
             >
               <motion.div
-                className="w-[72px] h-[72px] rounded-full flex items-center justify-center text-2xl border-[3px] relative"
+                className="rounded-full flex items-center justify-center border-[3px] relative"
                 style={{
+                  width: nodeSize,
+                  height: nodeSize,
                   borderColor: k.color,
                   background: isOnRoute ? `${k.color}25` : "hsl(220 15% 13%)",
                 }}
@@ -383,8 +400,7 @@ function NodeDiagram({
                 }}
                 transition={{ duration: 0.5 }}
               >
-                <span className="text-3xl">{k.emblem}</span>
-                {/* Pulse ring */}
+                <span className={emojiSize}>{k.emblem}</span>
                 <motion.div
                   className="absolute inset-0 rounded-full border-2"
                   style={{ borderColor: k.color }}
@@ -392,7 +408,7 @@ function NodeDiagram({
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 />
               </motion.div>
-              <span className="text-xs font-bold text-white/90 group-hover:text-white transition-colors whitespace-nowrap">
+              <span className={`${isMobile ? "text-[10px]" : "text-xs"} font-bold text-white/90 group-hover:text-white transition-colors whitespace-nowrap`}>
                 {k.name}
               </span>
             </motion.button>
@@ -416,8 +432,8 @@ function NodeDiagram({
             return (
               <motion.div
                 key={`label-${route.flowId}-${i}`}
-                className="absolute px-2 py-0.5 rounded-full text-[10px] font-bold text-white whitespace-nowrap pointer-events-none"
-                style={{ left: mx - 24, top: my - 12, backgroundColor: flow.color }}
+                className={`absolute px-1.5 py-0.5 rounded-full font-bold text-white whitespace-nowrap pointer-events-none ${isMobile ? "text-[8px]" : "text-[10px]"}`}
+                style={{ left: mx - 20, top: my - 10, backgroundColor: flow.color }}
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.4 + 0.3 }}
@@ -502,7 +518,7 @@ function CivCard({ kingdom }: { kingdom: KingdomData }) {
 
   return (
     <div
-      className="flex-shrink-0 w-[300px] rounded-2xl overflow-hidden shadow-lg"
+      className="flex-shrink-0 w-[280px] sm:w-[300px] rounded-2xl overflow-hidden shadow-lg"
       style={{ background: "#fff", border: "1px solid #e5e7eb" }}
     >
       {/* Top band */}
@@ -659,18 +675,18 @@ function FunFactsCarousel() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.3 }}
-            className="p-5 rounded-2xl min-h-[100px] flex items-center gap-4"
+            className="p-4 sm:p-5 rounded-2xl min-h-[100px] flex items-center gap-3 sm:gap-4 mx-10 sm:mx-0"
             style={{ border: `2px solid ${fact.color}33`, background: `${fact.color}08` }}
           >
-            <span className="text-4xl shrink-0">{fact.emoji}</span>
-            <p className="text-sm text-gray-700 leading-relaxed flex-1">{fact.text}</p>
+            <span className="text-3xl sm:text-4xl shrink-0">{fact.emoji}</span>
+            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed flex-1">{fact.text}</p>
           </motion.div>
         </AnimatePresence>
-        <button onClick={() => go("prev")} className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors">
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
+        <button onClick={() => go("prev")} className="absolute left-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
+          <ChevronLeft className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600" />
         </button>
-        <button onClick={() => go("next")} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors">
-          <ChevronRight className="w-4 h-4 text-gray-600" />
+        <button onClick={() => go("next")} className="absolute right-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
+          <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600" />
         </button>
       </div>
       <div className="flex justify-center gap-1.5">
@@ -733,7 +749,7 @@ export default function CultureSpreadMap() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ background: "#ffffff" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: "#ffffff" }}>
       {/* Section 1: Header */}
       <div
         className="relative overflow-hidden py-10 px-4 text-center"
@@ -745,21 +761,22 @@ export default function CultureSpreadMap() {
         <p className="mt-3 text-sm sm:text-base font-medium" style={{ color: "#D4AF37" }}>
           每个文明都有独特的光芒，它们彼此照亮
         </p>
-        <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}>
-          🎯 挑战：找出6条文化传播路线！已发现 <span style={{ color: "#D4AF37" }}>{discoveredFlows.size}/6</span>
+        <div className="mt-5 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold text-white" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}>
+          <span>🎯 挑战：找出6条文化传播路线！</span>
+          <span>已发现 <span style={{ color: "#D4AF37" }}>{discoveredFlows.size}/6</span></span>
         </div>
       </div>
 
       {/* Section 2: Node Diagram */}
       <div className="py-8 px-4" style={{ background: "#111827" }}>
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <p className="text-xs text-gray-400">点击任意节点，选择文化路线进行追踪</p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-2 gap-2">
+            <p className="text-[11px] sm:text-xs text-gray-400">点击任意节点，选择文化路线进行追踪</p>
             <Button
               size="sm"
               onClick={handlePlayAll}
               disabled={isPlaying}
-              className="h-8 px-4 text-xs font-bold"
+              className="h-10 sm:h-8 px-4 text-xs font-bold min-w-[44px]"
               style={{ background: "#D4AF37", color: "#111" }}
             >
               <Play className="w-3 h-3 mr-1" />
@@ -772,12 +789,12 @@ export default function CultureSpreadMap() {
             discoveredFlows={discoveredFlows}
           />
           {/* Legend */}
-          <div className="flex flex-wrap justify-center gap-3 mt-4">
+          <div className="grid grid-cols-3 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-3 mt-4">
             {FLOWS.map(f => (
               <button
                 key={f.id}
                 onClick={() => handleSelectFlow(f.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:scale-105"
+                className="flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-all hover:scale-105 min-h-[44px]"
                 style={{
                   background: discoveredFlows.has(f.id) ? `${f.color}25` : "rgba(255,255,255,0.05)",
                   border: `1.5px solid ${discoveredFlows.has(f.id) ? f.color : "#444"}`,
