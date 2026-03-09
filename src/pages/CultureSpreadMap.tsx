@@ -789,12 +789,12 @@ export default function CultureSpreadMap() {
             discoveredFlows={discoveredFlows}
           />
           {/* Legend */}
-          <div className="flex flex-wrap justify-center gap-3 mt-4">
+          <div className="grid grid-cols-3 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-3 mt-4">
             {FLOWS.map(f => (
               <button
                 key={f.id}
                 onClick={() => handleSelectFlow(f.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:scale-105"
+                className="flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-all hover:scale-105 min-h-[44px]"
                 style={{
                   background: discoveredFlows.has(f.id) ? `${f.color}25` : "rgba(255,255,255,0.05)",
                   border: `1.5px solid ${discoveredFlows.has(f.id) ? f.color : "#444"}`,
