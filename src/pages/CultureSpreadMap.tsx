@@ -682,11 +682,11 @@ function FunFactsCarousel() {
             <p className="text-sm text-gray-700 leading-relaxed flex-1">{fact.text}</p>
           </motion.div>
         </AnimatePresence>
-        <button onClick={() => go("prev")} className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors">
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
+        <button onClick={() => go("prev")} className="absolute left-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
+          <ChevronLeft className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600" />
         </button>
-        <button onClick={() => go("next")} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors">
-          <ChevronRight className="w-4 h-4 text-gray-600" />
+        <button onClick={() => go("next")} className="absolute right-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
+          <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600" />
         </button>
       </div>
       <div className="flex justify-center gap-1.5">
