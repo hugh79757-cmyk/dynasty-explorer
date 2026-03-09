@@ -22,10 +22,7 @@ function AppContent() {
     <>
       <ThemeToggle />
       <span
-        className="fixed top-2 right-3 z-[9999] text-[11px] opacity-40 hover:opacity-90 transition-opacity duration-300 pointer-events-auto select-none"
-        style={{ color: 'rgba(255,255,255,0.4)' }}
-        onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.9)')}
-        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+        className="fixed top-2 right-3 z-[9999] text-[11px] text-muted-foreground/40 hover:text-muted-foreground/90 transition-all duration-300 pointer-events-auto select-none"
       >
         성찬이를 위해, 아빠가 ❤️
       </span>
