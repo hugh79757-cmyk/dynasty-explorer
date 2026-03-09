@@ -23,6 +23,7 @@ function AppContent() {
           <Route path="/" element={<Index />} />
           <Route path="/dynasty-timeline" element={<DynastyTimeline />} />
           <Route path="/culture-flow" element={<CultureFlow />} />
+          <Route path="/culture-map" element={<CultureSpreadMap />} />
           <Route path="/history-quiz" element={<HistoryQuiz />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
