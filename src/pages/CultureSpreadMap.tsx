@@ -273,18 +273,32 @@ function NodeDiagram({
   activeRoutes: { flowId: string; nodes: string[] }[];
   discoveredFlows: Set<string>;
 }) {
-  // Compute pixel positions for each node
+  const isMobile = useIsMobile();
+
+  // Mobile: vertical layout; Desktop: horizontal layout
+  const MOBILE_POSITIONS: Record<string, { x: number; y: number }> = {
+    china:    { x: 150, y: 40 },
+    goguryeo: { x: 80, y: 140 },
+    baekje:   { x: 220, y: 140 },
+    gaya:     { x: 80, y: 240 },
+    silla:    { x: 220, y: 240 },
+    balhae:   { x: 150, y: 340 },
+    japan:    { x: 150, y: 440 },
+  };
+
   const getNodePos = (id: string) => {
+    if (isMobile) return MOBILE_POSITIONS[id];
     const pos = NODE_POSITIONS[id];
-    // 7 columns, 3 rows layout
-    const xPositions = [0, 1, 2, 3, 4, 5, 6];
-    const yPositions = [0, 1, 2];
-    const x = 80 + xPositions[pos.col] * 110;
-    const y = 60 + yPositions[pos.row] * 130;
+    const x = 80 + pos.col * 110;
+    const y = 60 + pos.row * 130;
     return { x, y };
   };
 
-  // Check if a connection is part of any active route
+  const nodeSize = isMobile ? 56 : 72;
+  const emojiSize = isMobile ? "text-2xl" : "text-3xl";
+  const canvasW = isMobile ? 300 : 860;
+  const canvasH = isMobile ? 500 : 380;
+
   const getConnectionColor = (a: string, b: string): { color: string; active: boolean } => {
     for (const route of activeRoutes) {
       const nodes = route.nodes;
@@ -299,10 +313,10 @@ function NodeDiagram({
   };
 
   return (
-    <div className="relative w-full overflow-x-auto">
-      <div className="relative mx-auto" style={{ width: 860, height: 380 }}>
+    <div className="relative w-full overflow-x-auto flex justify-center">
+      <div className="relative mx-auto" style={{ width: canvasW, height: canvasH }}>
         {/* SVG lines */}
-        <svg className="absolute inset-0 w-full h-full" style={{ width: 860, height: 380 }}>
+        <svg className="absolute inset-0 w-full h-full" style={{ width: canvasW, height: canvasH }}>
           {CONNECTIONS.map(([a, b]) => {
             const pa = getNodePos(a);
             const pb = getNodePos(b);
@@ -337,17 +351,17 @@ function NodeDiagram({
               const len = Math.sqrt(dx * dx + dy * dy);
               const ux = dx / len;
               const uy = dy / len;
-              // Shorten line to not overlap circles
-              const sx = p.x + ux * 44;
-              const sy = p.y + uy * 44;
-              const ex = next.x - ux * 44;
-              const ey = next.y - uy * 44;
+              const offset = nodeSize / 2 + 6;
+              const sx = p.x + ux * offset;
+              const sy = p.y + uy * offset;
+              const ex = next.x - ux * offset;
+              const ey = next.y - uy * offset;
               return (
                 <motion.line
                   key={`route-${route.flowId}-${i}`}
                   x1={sx} y1={sy} x2={ex} y2={ey}
                   stroke={flow.color}
-                  strokeWidth={4}
+                  strokeWidth={isMobile ? 3 : 4}
                   strokeLinecap="round"
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: 1 }}
@@ -365,15 +379,17 @@ function NodeDiagram({
           return (
             <motion.button
               key={k.id}
-              className="absolute flex flex-col items-center gap-1 group"
-              style={{ left: pos.x - 40, top: pos.y - 40 }}
+              className="absolute flex flex-col items-center gap-0.5 group"
+              style={{ left: pos.x - nodeSize / 2, top: pos.y - nodeSize / 2 }}
               onClick={() => onNodeClick(k.id)}
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.95 }}
             >
               <motion.div
-                className="w-[72px] h-[72px] rounded-full flex items-center justify-center text-2xl border-[3px] relative"
+                className="rounded-full flex items-center justify-center border-[3px] relative"
                 style={{
+                  width: nodeSize,
+                  height: nodeSize,
                   borderColor: k.color,
                   background: isOnRoute ? `${k.color}25` : "hsl(220 15% 13%)",
                 }}
@@ -384,8 +400,7 @@ function NodeDiagram({
                 }}
                 transition={{ duration: 0.5 }}
               >
-                <span className="text-3xl">{k.emblem}</span>
-                {/* Pulse ring */}
+                <span className={emojiSize}>{k.emblem}</span>
                 <motion.div
                   className="absolute inset-0 rounded-full border-2"
                   style={{ borderColor: k.color }}
@@ -393,7 +408,7 @@ function NodeDiagram({
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 />
               </motion.div>
-              <span className="text-xs font-bold text-white/90 group-hover:text-white transition-colors whitespace-nowrap">
+              <span className={`${isMobile ? "text-[10px]" : "text-xs"} font-bold text-white/90 group-hover:text-white transition-colors whitespace-nowrap`}>
                 {k.name}
               </span>
             </motion.button>
@@ -417,8 +432,8 @@ function NodeDiagram({
             return (
               <motion.div
                 key={`label-${route.flowId}-${i}`}
-                className="absolute px-2 py-0.5 rounded-full text-[10px] font-bold text-white whitespace-nowrap pointer-events-none"
-                style={{ left: mx - 24, top: my - 12, backgroundColor: flow.color }}
+                className={`absolute px-1.5 py-0.5 rounded-full font-bold text-white whitespace-nowrap pointer-events-none ${isMobile ? "text-[8px]" : "text-[10px]"}`}
+                style={{ left: mx - 20, top: my - 10, backgroundColor: flow.color }}
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.4 + 0.3 }}
