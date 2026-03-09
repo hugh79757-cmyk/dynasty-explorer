@@ -675,11 +675,11 @@ function FunFactsCarousel() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.3 }}
-            className="p-5 rounded-2xl min-h-[100px] flex items-center gap-4"
+            className="p-4 sm:p-5 rounded-2xl min-h-[100px] flex items-center gap-3 sm:gap-4 mx-10 sm:mx-0"
             style={{ border: `2px solid ${fact.color}33`, background: `${fact.color}08` }}
           >
-            <span className="text-4xl shrink-0">{fact.emoji}</span>
-            <p className="text-sm text-gray-700 leading-relaxed flex-1">{fact.text}</p>
+            <span className="text-3xl sm:text-4xl shrink-0">{fact.emoji}</span>
+            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed flex-1">{fact.text}</p>
           </motion.div>
         </AnimatePresence>
         <button onClick={() => go("prev")} className="absolute left-1 top-1/2 -translate-y-1/2 p-2.5 sm:p-1.5 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
