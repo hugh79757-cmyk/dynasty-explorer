@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index, { NavBar } from "./pages/Index";
 import DynastyTimeline from "./pages/DynastyTimeline";
 import CultureFlow from "./pages/CultureFlow";
+import CultureSpreadMap from "./pages/CultureSpreadMap";
 import HistoryQuiz from "./pages/HistoryQuiz";
 import NotFound from "./pages/NotFound";
 
