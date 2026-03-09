@@ -770,13 +770,13 @@ export default function CultureSpreadMap() {
       {/* Section 2: Node Diagram */}
       <div className="py-8 px-4" style={{ background: "#111827" }}>
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <p className="text-xs text-gray-400">点击任意节点，选择文化路线进行追踪</p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-2 gap-2">
+            <p className="text-[11px] sm:text-xs text-gray-400">点击任意节点，选择文化路线进行追踪</p>
             <Button
               size="sm"
               onClick={handlePlayAll}
               disabled={isPlaying}
-              className="h-8 px-4 text-xs font-bold"
+              className="h-10 sm:h-8 px-4 text-xs font-bold min-w-[44px]"
               style={{ background: "#D4AF37", color: "#111" }}
             >
               <Play className="w-3 h-3 mr-1" />
